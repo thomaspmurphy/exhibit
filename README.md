@@ -52,9 +52,18 @@ mix escript.install github thomaspmurphy/exhibit
 The skill, either through the escript or as a Claude Code plugin:
 
 ```
-exhibit install-skill                      # copies into ~/.claude/skills/exhibit
-claude plugin install thomaspmurphy/exhibit  # or, as a plugin
+exhibit install-skill        # copies into ~/.claude/skills/exhibit
 ```
+
+or as a Claude Code plugin; the repo is its own marketplace:
+
+```
+/plugin install exhibit --marketplace thomaspmurphy/exhibit
+```
+
+On older Claude Code versions, add the marketplace first with
+`claude plugin marketplace add thomaspmurphy/exhibit`, then
+`claude plugin install exhibit@exhibit`.
 
 Elixir 1.15 or later. The escript must be built and run with the same OTP
 major as the target project, as any escript must.

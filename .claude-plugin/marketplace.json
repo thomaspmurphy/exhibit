@@ -1,0 +1,14 @@
+{
+  "name": "exhibit",
+  "description": "Exhibit: explain an Elixir branch or PR as a runnable Livebook.",
+  "owner": {
+    "name": "Thomas Murphy"
+  },
+  "plugins": [
+    {
+      "name": "exhibit",
+      "source": "./",
+      "description": "Explain a branch or PR of an Elixir project as a short, runnable Livebook with outputs filled in, and reuse it as the PR description."
+    }
+  ]
+}
