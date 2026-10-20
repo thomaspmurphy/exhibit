@@ -43,11 +43,17 @@ cells see the project's modules, config and started applications.
 
 ## Install
 
-The escript:
+The escript, built with the Elixir and OTP active in the directory you run
+this from, so run it from a project you will use it on:
 
 ```
 mix escript.install github thomaspmurphy/exhibit
 ```
+
+The skill does this itself on first use when `exhibit` is missing, and
+falls back to `~/.mix/escripts/exhibit` when that directory is not on the
+PATH. An escript must run on the same OTP major it was built with; for a
+project on another OTP, run the install again from that project.
 
 The skill, either through the escript or as a Claude Code plugin:
 

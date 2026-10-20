@@ -7,8 +7,8 @@ description: >
   notebook converts into the PR description. Use whenever the user asks to "explain this
   branch", "explain this PR", "walk me through this PR", "exhibit this", "write the PR
   description", "help me understand what this branch does", or pastes a GitHub PR URL
-  for an Elixir repo and asks what it does. Requires the `exhibit` escript
-  (`mix escript.install github thomaspmurphy/exhibit`).
+  for an Elixir repo and asks what it does. Installs the `exhibit` escript
+  itself on first use.
 metadata:
   version: "0.1.0"
 ---
@@ -23,6 +23,24 @@ writes the outputs back. The notebook is disposable and never committed.
 
 Budgets, which are not negotiable: **at most 8 cells, under 300 words of
 prose, one diagram.** A reader should finish it in five minutes.
+
+## 0. Make sure the escript is there
+
+The notebook is run by the `exhibit` escript. Check for it before anything
+else, from inside the project so it is built with the project's Elixir and
+OTP:
+
+```bash
+EXHIBIT=$(command -v exhibit || echo "$HOME/.mix/escripts/exhibit")
+"$EXHIBIT" --version >/dev/null 2>&1 || mix escript.install --force github thomaspmurphy/exhibit
+```
+
+Then use `$EXHIBIT` wherever this skill says `exhibit`. `~/.mix/escripts`
+is rarely on the PATH, so never tell the user to add it; the absolute path
+works. If `--version` fails although the file exists, the escript was built
+for another OTP major than the project's: run the install line again from
+the project and it is rebuilt. The install compiles exhibit once; do not
+add exhibit to the project's `mix.exs`.
 
 ## 1. Gather context
 
