@@ -17,6 +17,8 @@ defmodule Exhibit.MixProject do
       package: package(),
       docs: docs(),
       escript: escript(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      test_ignore_filters: [~r"^test/fixtures/"],
       aliases: aliases()
     ]
   end
@@ -24,6 +26,9 @@ defmodule Exhibit.MixProject do
   def application do
     [extra_applications: [:logger]]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [
