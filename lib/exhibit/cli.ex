@@ -2,7 +2,8 @@ defmodule Exhibit.CLI do
   @moduledoc """
   The `exhibit` escript.
 
-      exhibit run NOTEBOOK [--project DIR] [--env ENV]
+      exhibit run NOTEBOOK [--project DIR] [--env ENV] [--open]
+      exhibit open NOTEBOOK
       exhibit pr-body NOTEBOOK
       exhibit install-skill [--dir DIR]
       exhibit --help | --version
@@ -29,11 +30,16 @@ defmodule Exhibit.CLI do
   exhibit #{@version}
 
   Usage:
-    exhibit run NOTEBOOK [--project DIR] [--env ENV]
+    exhibit run NOTEBOOK [--project DIR] [--env ENV] [--open]
         Evaluate the notebook's Elixir cells inside the project and write
         Livebook-format outputs back into the file. DIR defaults to the
         nearest ancestor of NOTEBOOK containing mix.exs; ENV defaults to test.
-        Exits with the runner's status (1 if a cell failed).
+        Exits with the runner's status (1 if a cell failed). With --open,
+        open the notebook in Livebook after a successful run.
+
+    exhibit open NOTEBOOK
+        Open the notebook in Livebook: the macOS desktop app if installed
+        (open -a Livebook), otherwise a detached `livebook server --open`.
 
     exhibit pr-body NOTEBOOK
         Print the notebook as GitHub-flavoured markdown for a PR description.
@@ -57,6 +63,8 @@ defmodule Exhibit.CLI do
   @doc "Runs the CLI and returns the exit status instead of halting."
   @spec run([String.t()]) :: non_neg_integer()
   def run(["run" | args]), do: run_notebook(args)
+  def run(["open", path]), do: open_notebook(Path.expand(path))
+  def run(["open" | _]), do: usage_error("open takes exactly one NOTEBOOK")
   def run(["pr-body", path]), do: pr_body(path)
   def run(["pr-body" | _]), do: usage_error("pr-body takes exactly one NOTEBOOK")
   def run(["install-skill" | args]), do: install_skill(args)
@@ -68,13 +76,19 @@ defmodule Exhibit.CLI do
   # -- run -----------------------------------------------------------------
 
   defp run_notebook(args) do
-    {opts, rest, invalid} = OptionParser.parse(args, strict: [project: :string, env: :string])
+    {opts, rest, invalid} =
+      OptionParser.parse(args, strict: [project: :string, env: :string, open: :boolean])
 
     with [] <- invalid,
          [notebook] <- rest,
          {:ok, project} <- project_for(notebook, opts[:project]) do
       env = Keyword.get(opts, :env, "test")
-      exec_runner(Path.expand(notebook), project, env)
+      notebook = Path.expand(notebook)
+
+      case exec_runner(notebook, project, env) do
+        0 -> if opts[:open], do: open_notebook(notebook), else: 0
+        status -> status
+      end
     else
       [{flag, _} | _] -> usage_error("unknown option #{flag}")
       [] -> usage_error("run needs a NOTEBOOK")
@@ -130,6 +144,49 @@ defmodule Exhibit.CLI do
     else
       error("notebook not found: #{notebook}")
     end
+  end
+
+  # -- open ----------------------------------------------------------------
+
+  defp open_notebook(notebook) do
+    cond do
+      not File.exists?(notebook) ->
+        error("notebook not found: #{notebook}")
+
+      desktop_app() ->
+        {_, status} = System.cmd("open", ["-a", "Livebook", notebook], stderr_to_stdout: true)
+        if status == 0, do: IO.puts("exhibit: opened #{notebook} in Livebook")
+        status
+
+      System.find_executable("livebook") ->
+        # The server keeps running in the background after we exit.
+        {_, status} =
+          System.cmd("sh", [
+            "-c",
+            ~s(nohup livebook server --open "$0" >/dev/null 2>&1 &),
+            notebook
+          ])
+
+        if status == 0, do: IO.puts("exhibit: started livebook server for #{notebook}")
+        status
+
+      true ->
+        error(
+          "no Livebook found: install the desktop app from https://livebook.dev " <>
+            "or the escript (mix escript.install hex livebook), then open #{notebook}"
+        )
+    end
+  end
+
+  defp desktop_app do
+    :os.type() == {:unix, :darwin} and
+      Enum.any?(
+        [
+          "/Applications/Livebook.app",
+          Path.join(System.user_home!(), "Applications/Livebook.app")
+        ],
+        &File.dir?/1
+      )
   end
 
   # -- pr-body -------------------------------------------------------------

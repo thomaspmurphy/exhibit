@@ -90,6 +90,15 @@ DB_DATABASE=myapp_test_mybranch exhibit run .exhibit/mybranch.livemd
 ```
 
 ```
+exhibit open NOTEBOOK
+```
+
+Opens the notebook in Livebook: the macOS desktop app when it is installed
+(the `.dmg` install provides no `livebook` command), otherwise a detached
+`livebook server --open`. `exhibit run --open` does the same after a
+successful run, which is how the skill hands the notebook over.
+
+```
 exhibit pr-body NOTEBOOK
 ```
 
@@ -125,10 +134,10 @@ Three to five bullets.
 ```
 
 Budgets: at most eight cells, under three hundred words of prose, one
-diagram. Open it with `open -a Livebook <path>` (the macOS desktop app) or
-`livebook server --open <path>` (the escript); the outputs are already in
-the file, and attaching the runtime to the project's own
-`iex --sname name -S mix` makes the cells live again.
+diagram. The skill opens it in Livebook when the run succeeds; `exhibit
+open <path>` reopens it. The outputs are already in the file, and attaching
+the runtime to the project's own `iex --sname name -S mix` makes the cells
+live again.
 
 Only terminal text is persisted, matching what Livebook itself writes when
 `persist_outputs` is on. Notebooks stay text-only, diff cleanly, and read

@@ -132,8 +132,12 @@ a one-sentence lead-in says more than a paragraph about it.
 ## 4. Run it
 
 ```bash
-exhibit run <project>/.exhibit/<branch-slug>.livemd
+exhibit run <project>/.exhibit/<branch-slug>.livemd --open
 ```
+
+`--open` opens the notebook in Livebook once every cell has succeeded, so
+the user sees it without being asked to run anything. On a failing run
+nothing opens.
 
 The runner executes the cells in the project under `MIX_ENV=test` and
 rewrites the file with the outputs. It prints each cell's outputs as it goes
@@ -157,21 +161,10 @@ explanation and should be short, stable and free of noise.
 
 ## 5. Hand over
 
-Tell the user the path and how to open it. With the Livebook desktop app
-on macOS (the `.dmg` install, which puts no `livebook` command on the PATH):
-
-```bash
-open -a Livebook <project>/.exhibit/<branch-slug>.livemd
-```
-
-With the escript install of Livebook:
-
-```bash
-livebook server --open <project>/.exhibit/<branch-slug>.livemd
-```
-
-Check `command -v livebook` and `ls /Applications/Livebook.app` to pick the
-one that applies, and give only that one.
+The successful `--open` run has already opened the notebook in Livebook
+(the macOS desktop app if installed, otherwise a `livebook server`). Tell
+the user the path, and that `exhibit open <path>` reopens it later. If
+`--open` reported that no Livebook was found, say so and give the path.
 
 In Livebook they can attach the runtime to their own node started with
 `iex --sname <name> -S mix` from the project to re-run the cells live; the

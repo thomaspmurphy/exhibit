@@ -16,6 +16,13 @@ defmodule Exhibit.CLITest do
     assert capture_io(fn -> assert CLI.run(["--version"]) == 0 end) =~ ~r/^\d+\.\d+\.\d+/
   end
 
+  test "open needs exactly one notebook and must find it" do
+    assert capture_io(:stderr, fn -> assert CLI.run(["open"]) == 2 end) =~ "exactly one"
+
+    assert capture_io(:stderr, fn -> assert CLI.run(["open", "/nope.livemd"]) == 1 end) =~
+             "not found"
+  end
+
   test "rejects unknown commands with status 2" do
     assert capture_io(:stderr, fn -> assert CLI.run(["frobnicate"]) == 2 end) =~ "unknown command"
   end
