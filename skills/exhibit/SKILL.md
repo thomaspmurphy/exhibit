@@ -139,6 +139,14 @@ The runner executes the cells in the project under `MIX_ENV=test` and
 rewrites the file with the outputs. It prints each cell's outputs as it goes
 and exits 1 if a cell fails, leaving the error as that cell's output.
 
+Before the first cell the runner compares the test database with the
+branch's migrations and prints one line if they differ. If that line
+appears, or a cell fails on a missing column or table, suspect the shared
+test database before the notebook: in a worktree or on an old branch, give
+the checkout its own database (`DB_DATABASE=<name> MIX_ENV=test mix
+ecto.setup`, or whatever variable the project's test config reads) and rerun
+`exhibit run` with the same variable set.
+
 If a cell fails, read the error, fix the notebook and rerun. At most three
 rounds. A cell that still cannot be made to work is replaced by a sentence
 saying what could not be demonstrated and why. Never hand over a notebook
@@ -149,11 +157,21 @@ explanation and should be short, stable and free of noise.
 
 ## 5. Hand over
 
-Tell the user the path and how to open it:
+Tell the user the path and how to open it. With the Livebook desktop app
+on macOS (the `.dmg` install, which puts no `livebook` command on the PATH):
+
+```bash
+open -a Livebook <project>/.exhibit/<branch-slug>.livemd
+```
+
+With the escript install of Livebook:
 
 ```bash
 livebook server --open <project>/.exhibit/<branch-slug>.livemd
 ```
+
+Check `command -v livebook` and `ls /Applications/Livebook.app` to pick the
+one that applies, and give only that one.
 
 In Livebook they can attach the runtime to their own node started with
 `iex --sname <name> -S mix` from the project to re-run the cells live; the

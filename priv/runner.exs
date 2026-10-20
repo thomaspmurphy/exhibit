@@ -393,6 +393,7 @@ defmodule Exhibit.Runner do
     path = Path.expand(path)
     blocks = path |> File.read!() |> Parser.parse()
 
+    warn_schema_drift()
     {blocks, status} = evaluate(blocks, path, project)
 
     doc = blocks |> Parser.render() |> Output.ensure_persist_outputs()
@@ -447,8 +448,78 @@ defmodule Exhibit.Runner do
         message = Exception.format(kind, payload, trim_stacktrace(stacktrace, path, project))
         outputs = stdout_outputs ++ [message]
         print_outputs(outputs)
-        IO.puts(:stderr, "exhibit: cell #{index} (line #{cell.line}) failed\n#{message}")
+        IO.puts(:stderr, "exhibit: cell #{index} (line #{cell.line}) failed")
         {outputs, {:halted, message}}
+    end
+  end
+
+  # A cell that fails on a missing column or table is usually running against
+  # a test database migrated for another branch. Say so before the first cell
+  # rather than let the author dig the cause out of a stacktrace. One query
+  # per repo; never fatal, and silent when the project has no Ecto repos or
+  # the check itself cannot run.
+  defp warn_schema_drift do
+    for repo <- ecto_repos(), message = schema_drift(repo) do
+      IO.puts("exhibit: #{message}")
+    end
+
+    :ok
+  end
+
+  defp ecto_repos do
+    if Code.ensure_loaded?(Ecto.Migrator) and Code.ensure_loaded?(Mix.Project) do
+      case Mix.Project.config()[:app] do
+        nil -> []
+        app -> Application.get_env(app, :ecto_repos, [])
+      end
+    else
+      []
+    end
+  rescue
+    _ -> []
+  end
+
+  defp schema_drift(repo) do
+    # Called dynamically: exhibit itself does not depend on Ecto.
+    migrations = apply(Ecto.Migrator, :migrations, [repo])
+    drift_message(repo.config()[:database], migrations)
+  rescue
+    _ -> nil
+  catch
+    _, _ -> nil
+  end
+
+  @doc """
+  Describes how `migrations` (as returned by `Ecto.Migrator.migrations/1`)
+  differ from the branch, or `nil` when they match. A `:down` entry means the
+  database is behind the branch; an `:up` entry whose file is missing means
+  the database was migrated by a branch this one does not have.
+  """
+  @spec drift_message(String.t() | nil, [{:up | :down, integer(), String.t()}]) ::
+          String.t() | nil
+  def drift_message(database, migrations) do
+    behind = Enum.count(migrations, &match?({:down, _, _}, &1))
+    ahead = Enum.count(migrations, &match?({:up, _, "** FILE NOT FOUND **"}, &1))
+    database = database || "the database"
+
+    case {behind, ahead} do
+      {0, 0} ->
+        nil
+
+      {behind, 0} ->
+        "#{database} is behind this branch by #{behind} migration(s); " <>
+          "run mix ecto.migrate (MIX_ENV=test) before trusting the cells"
+
+      {0, ahead} ->
+        "#{database} is ahead of this branch by #{ahead} migration(s) it does not have; " <>
+          "cells may hit missing columns or tables. Give this checkout its own database, " <>
+          "for example DB_DATABASE=<name> MIX_ENV=test mix ecto.setup, then rerun with " <>
+          "the same variable"
+
+      {behind, ahead} ->
+        "#{database} is behind this branch by #{behind} migration(s) and ahead by " <>
+          "#{ahead} it does not have; give this checkout its own database, for example " <>
+          "DB_DATABASE=<name> MIX_ENV=test mix ecto.setup, then rerun with the same variable"
     end
   end
 

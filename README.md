@@ -77,6 +77,18 @@ defaults to `test`. Under the hood:
 cd DIR && MIX_ENV=test mix run <runner.exs> NOTEBOOK
 ```
 
+Before the first cell, the runner compares each Ecto repo's database with
+the branch's migrations and prints one line if the database is behind or
+was migrated by a branch this one lacks. It does not migrate anything. The
+usual cause is several worktrees sharing one test database; the fix is a
+database per checkout, which the project's own config already allows when
+it reads the database name from the environment:
+
+```
+DB_DATABASE=myapp_test_mybranch MIX_ENV=test mix ecto.setup
+DB_DATABASE=myapp_test_mybranch exhibit run .exhibit/mybranch.livemd
+```
+
 ```
 exhibit pr-body NOTEBOOK
 ```
@@ -113,8 +125,9 @@ Three to five bullets.
 ```
 
 Budgets: at most eight cells, under three hundred words of prose, one
-diagram. Open it with `livebook server --open <path>`; the outputs are
-already in the file, and attaching the runtime to the project's own
+diagram. Open it with `open -a Livebook <path>` (the macOS desktop app) or
+`livebook server --open <path>` (the escript); the outputs are already in
+the file, and attaching the runtime to the project's own
 `iex --sname name -S mix` makes the cells live again.
 
 Only terminal text is persisted, matching what Livebook itself writes when
