@@ -105,6 +105,30 @@ The file must begin with the Livebook header; write it yourself:
 # Title
 ```
 
+### How to write it
+
+The notebook is also the PR description, read by a reviewer who has the diff
+open next to it. Write as the author of the change explaining it to a
+colleague, in plain declarative sentences. Concretely:
+
+- Every sentence carries something the diff cannot show: the motivating
+  problem, a constraint, a behaviour before and after, a decision and its
+  reason. If deleting a sentence loses nothing, delete it.
+- No preamble and no summary of what the document is about to say. Start
+  with the change itself, never with "This PR" or "In this change, we".
+- No quality adjectives: not robust, comprehensive, seamless, elegant,
+  powerful, clean, enhanced, improved. Say what it does.
+- No file-by-file restatement of the diff, no "Key changes" lists, no
+  bold-label bullets such as "**Impact:**", no emoji, no closing summary.
+- For a bugfix, the shape is "Before, X. Now, Y." with the input that broke.
+- Review pointers are specific: a function and what to check in it, a
+  migration and what it does to existing rows, a config key and its default.
+  Never "ensure tests pass" or "verify the logic is correct".
+- The title is a commit subject: short, imperative, no trailing period.
+
+When in doubt, shorter. The outputs do much of the explaining; a cell with
+a one-sentence lead-in says more than a paragraph about it.
+
 ## 4. Run it
 
 ```bash

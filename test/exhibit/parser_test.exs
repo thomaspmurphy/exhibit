@@ -16,7 +16,7 @@ defmodule Exhibit.ParserTest do
     assert first.outputs == ["stale output that must be regenerated", "another stale output"]
 
     assert second.line == 48
-    assert second.metadata == [~s(<!-- livebook:{"reevaluate_automatically":true} -->), ""]
+    assert second.metadata == [~s|<!-- livebook:{"reevaluate_automatically":true} -->|, ""]
     assert second.outputs == []
 
     assert third.fence == "```"
