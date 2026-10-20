@@ -51,9 +51,11 @@ mix escript.install github thomaspmurphy/exhibit
 ```
 
 The skill does this itself on first use when `exhibit` is missing, and
-falls back to `~/.mix/escripts/exhibit` when that directory is not on the
-PATH. An escript must run on the same OTP major it was built with; for a
-project on another OTP, run the install again from that project.
+runs it by absolute path from the directory `Mix.path_for(:escripts)`
+reports when that is not on the PATH. Under mise or asdf that directory is
+per Elixir version, so each toolchain keeps its own build. An escript must
+run on the same OTP major it was built with; for a project on another OTP,
+run the install again from that project.
 
 The skill, either through the escript or as a Claude Code plugin:
 

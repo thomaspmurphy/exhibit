@@ -31,16 +31,21 @@ else, from inside the project so it is built with the project's Elixir and
 OTP:
 
 ```bash
-EXHIBIT=$(command -v exhibit || echo "$HOME/.mix/escripts/exhibit")
-"$EXHIBIT" --version >/dev/null 2>&1 || mix escript.install --force github thomaspmurphy/exhibit
+EXHIBIT=$(command -v exhibit || true)
+if [ -z "$EXHIBIT" ] || ! "$EXHIBIT" --version >/dev/null 2>&1; then
+  mix escript.install --force github thomaspmurphy/exhibit
+  EXHIBIT=$(command -v exhibit || echo "$(elixir -e 'IO.puts Mix.path_for(:escripts)')/exhibit")
+fi
 ```
 
-Then use `$EXHIBIT` wherever this skill says `exhibit`. `~/.mix/escripts`
-is rarely on the PATH, so never tell the user to add it; the absolute path
-works. If `--version` fails although the file exists, the escript was built
-for another OTP major than the project's: run the install line again from
-the project and it is rebuilt. The install compiles exhibit once; do not
-add exhibit to the project's `mix.exs`.
+Then use `$EXHIBIT` wherever this skill says `exhibit`. Mix reports where
+it installs escripts; under a version manager such as mise that directory
+is per Elixir version, so each toolchain gets its own build. That directory
+is often not on the PATH: use the absolute path rather than telling the
+user to edit their shell configuration. If `--version` fails although the
+file exists, the escript was built for another OTP major than the project's,
+and the install line rebuilds it. Do not add exhibit to the project's
+`mix.exs`.
 
 ## 1. Gather context
 
