@@ -1,0 +1,60 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# Sample notebook
+
+A paragraph of prose that must survive untouched, including `inline code`
+and a fenced sample that is not a cell:
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+not_a_cell = :kept_as_markdown
+```
+
+## Where it lives
+
+```mermaid
+graph LR
+  A[caller] --> B[SampleApp.greet/1]
+  B --> C[string]
+```
+
+## See it work
+
+This cell prints and binds a variable.
+
+```elixir
+IO.puts("hello from the notebook")
+x = 40
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+stale output that must be regenerated
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+another stale output
+```
+
+This cell sets an alias used by the next one.
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+alias SampleApp, as: S
+S.greet("exhibit")
+```
+
+The alias and the binding carry over.
+
+```elixir
+%{sum: S.add(x, 2), ticks: "``` inside a result"}
+```
+
+## Review pointers
+
+* Nothing to see here.

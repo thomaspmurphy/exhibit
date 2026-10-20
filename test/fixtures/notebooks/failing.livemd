@@ -1,0 +1,14 @@
+# Failing notebook
+
+```elixir
+IO.puts("still captured")
+:first
+```
+
+```elixir
+SampleApp.explode(:missing)
+```
+
+```elixir
+:never_evaluated
+```

@@ -1,0 +1,7 @@
+{
+  "name": "exhibit",
+  "description": "Explain a branch or PR of an Elixir project as a short, runnable Livebook with outputs filled in, and reuse it as the PR description.",
+  "version": "0.1.0",
+  "author": { "name": "Thomas Murphy" },
+  "keywords": ["elixir", "livebook", "pull-request", "code-review", "notebook"]
+}

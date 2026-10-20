@@ -1,0 +1,16 @@
+/_build/
+/cover/
+/deps/
+/doc/
+/tmp/
+erl_crash.dump
+*.ez
+exhibit-*.tar
+/exhibit
+
+# Fixture project build output
+test/fixtures/*/_build/
+test/fixtures/*/deps/
+
+# Exhibit notebooks are disposable
+.exhibit/
